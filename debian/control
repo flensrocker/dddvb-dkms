@@ -1,0 +1,13 @@
+Source: dddvb-dkms
+Section: misc
+Priority: optional
+Maintainer: Gerald Dachs <gda@dachsweb.de>
+Build-Depends: debhelper (>= 7), dkms, libproc-processtable-perl
+Standards-Version: 3.8.1
+
+Package: dddvb-dkms
+Architecture: all
+Depends: dkms (>= 1.95), ${misc:Depends}
+Conflicts: s2-liplianin-dkms, v4l-dvb-dkms, linux-tbs-drivers-dkms, linux-media-tbs-dkms, linux-media-dkms, media-build-experimental-dkms
+Replaces: s2-liplianin-dkms, v4l-dvb-dkms, linux-tbs-drivers-dkms, linux-media-tbs-dkms, linux-media-dkms
+Description: dddvb driver in DKMS format.
