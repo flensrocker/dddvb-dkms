@@ -6,7 +6,7 @@
 
 DEB_NAME=dddvb
 NAME=dddvb
-VERSION=0.9.10
+VERSION=0.9.10.2yavdr0
 
 configure: configure-stamp
 configure-stamp:
@@ -51,4 +51,8 @@ binary-indep: build install
 	dh_builddeb
 
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+
+make-orig:
+	git archive --format=tar.gz --prefix=dddvb-dkms-$(VERSION)/ -o ../dddvb-dkms_$(VERSION).orig.tar.gz master
+
+.PHONY: build clean binary-indep binary-arch binary install configure make-orig
