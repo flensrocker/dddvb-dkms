@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.10.3yavdr0) precise; urgency=medium
+
+  * add drxk_lockstatus_fix.diff
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 07 Nov 2013 19:00:05 +0100
+
 dddvb-dkms (0.9.10.2yavdr0) precise; urgency=medium
 
   * use drxk and tda18271c2dd from Oliver Endriss' repository
