@@ -1,0 +1,16 @@
+diff --git a/frontends/stv6110x.c b/frontends/stv6110x.c
+index f36cab1..ed013d5 100644
+--- a/frontends/stv6110x.c
++++ b/frontends/stv6110x.c
+@@ -36,6 +36,11 @@ static unsigned int verbose;
+ module_param(verbose, int, 0644);
+ MODULE_PARM_DESC(verbose, "Set Verbosity level");
+ 
++static int stv6110x_dummy_for_srcversion(void)
++{
++	return 0;
++}
++
+ static int stv6110x_read_reg(struct stv6110x_state *stv6110x, u8 reg, u8 *data)
+ {
+ 	int ret;

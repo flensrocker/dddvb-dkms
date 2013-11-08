@@ -1,3 +1,10 @@
+dddvb-dkms (0.9.10.4yavdr0) precise; urgency=medium
+
+  * add cxd2843 to dkms.conf
+  * add stv6110x_srcversion.diff so module will always be installed
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sat, 09 Nov 2013 09:54:49 +0100
+
 dddvb-dkms (0.9.10.3yavdr0) precise; urgency=medium
 
   * add drxk_lockstatus_fix.diff

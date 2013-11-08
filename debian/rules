@@ -6,7 +6,7 @@
 
 DEB_NAME=dddvb
 NAME=dddvb
-VERSION=0.9.10.3yavdr0
+VERSION=0.9.10.4yavdr0
 
 configure: configure-stamp
 configure-stamp:
