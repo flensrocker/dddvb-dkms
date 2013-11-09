@@ -14,3 +14,19 @@ index f36cab1..ed013d5 100644
  static int stv6110x_read_reg(struct stv6110x_state *stv6110x, u8 reg, u8 *data)
  {
  	int ret;
+diff --git a/frontends/lnbp21.c b/frontends/lnbp21.c
+index 1343725..9098aee 100644
+--- a/frontends/lnbp21.c
++++ b/frontends/lnbp21.c
+@@ -44,6 +44,11 @@ struct lnbp21 {
+ 	u8			i2c_addr;
+ };
+ 
++static int lnbp21_dummy_for_srcversion(void)
++{
++       return 0;
++}
++
+ static int lnbp21_set_voltage(struct dvb_frontend *fe,
+ 					fe_sec_voltage_t voltage)
+ {

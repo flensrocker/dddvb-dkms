@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.10.5yavdr0) precise; urgency=medium
+
+  * add lnbp21 to srcversion.diff
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sat, 09 Nov 2013 18:54:31 +0100
+
 dddvb-dkms (0.9.10.4yavdr0) precise; urgency=medium
 
   * add cxd2843 to dkms.conf
