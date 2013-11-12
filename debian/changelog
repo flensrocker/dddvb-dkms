@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.10.6yavdr0) precise; urgency=medium
+
+  * stv090x: don't use DBVALS
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Tue, 12 Nov 2013 22:17:17 +0100
+
 dddvb-dkms (0.9.10.5yavdr0) precise; urgency=medium
 
   * add lnbp21 to srcversion.diff
