@@ -1,7 +1,7 @@
 --- a/frontends/drxk_hard.c	2012-01-21 18:02:59.000000000 +0100
 +++ b/frontends/drxk_hard.c	2012-01-21 18:05:06.000000000 +0100
-@@ -1958,6 +1958,7 @@ static int GetLockStatus(struct drxk_sta
- 		status = GetDVBTLockStatus(state, pLockStatus);
+@@ -1908,6 +1908,7 @@ static int get_lock_status(struct drxk_sta
+ 		status = get_dvbt_lock_status(state, p_lock_status);
  		break;
  	default:
 +		status = 0;
