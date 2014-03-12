@@ -1,0 +1,35 @@
+diff --git a/ddbridge/ddbridge-core.c b/ddbridge/ddbridge-core.c
+index 60a00f2..90083c3 100644
+--- a/ddbridge/ddbridge-core.c
++++ b/ddbridge/ddbridge-core.c
+@@ -384,7 +384,7 @@ static void ddb_input_stop(struct ddb_input *input)
+ 		input->dma->running = 0;
+ 		spin_unlock_irq(&input->dma->lock);
+ 	}
+-	pr_info("input_stop %d.%d\n", dev->nr, input->nr);
++	/* pr_info("input_stop %d.%d\n", dev->nr, input->nr); */
+ }
+ 
+ static void ddb_input_start(struct ddb_input *input)
+@@ -417,7 +417,7 @@ static void ddb_input_start(struct ddb_input *input)
+ 		input->dma->running = 1;
+ 		spin_unlock_irq(&input->dma->lock);
+ 	}
+-	pr_info("input_start %d.%d\n", dev->nr, input->nr);
++	/* pr_info("input_start %d.%d\n", dev->nr, input->nr); */
+ }
+ 
+ 
+diff --git a/frontends/tda18212dd.c b/frontends/tda18212dd.c
+index 7d60e03..e0461df 100644
+--- a/frontends/tda18212dd.c
++++ b/frontends/tda18212dd.c
+@@ -774,7 +774,7 @@ static int set_params(struct dvb_frontend *fe)
+ 
+ 	bw = (p->bandwidth_hz + 999999) / 1000000;
+ 	state->m_Frequency = p->frequency;
+-	printk("tuner bw=%u  freq=%u\n", bw, state->m_Frequency);
++	/* printk("tuner bw=%u  freq=%u\n", bw, state->m_Frequency); */
+ 	if (p->delivery_system == SYS_DVBT ||
+ 	    p->delivery_system == SYS_DVBT2 ||
+ 	    p->delivery_system == SYS_ISDBT ||

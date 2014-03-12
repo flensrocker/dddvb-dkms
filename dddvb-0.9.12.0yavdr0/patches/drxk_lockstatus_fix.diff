@@ -1,0 +1,11 @@
+diff --git a/frontends/drxk_hard.c b/frontends/drxk_hard.c
+index 53cb65b..a28bc5a 100644
+--- a/frontends/drxk_hard.c
++++ b/frontends/drxk_hard.c
+@@ -1908,5 +1908,6 @@ static int get_lock_status(struct drxk_state *state, u32 *p_lock_status)
+ 		status = get_dvbt_lock_status(state, p_lock_status);
+ 		break;
+ 	default:
++		status = 0;
+ 		break;
+ 	}

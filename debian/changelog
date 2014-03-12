@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.12.0yavdr0) precise; urgency=medium
+
+  * new upstream version
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 12 Mar 2014 18:42:04 +0100
+
 dddvb-dkms (0.9.10.6yavdr0) precise; urgency=medium
 
   * stv090x: don't use DBVALS
