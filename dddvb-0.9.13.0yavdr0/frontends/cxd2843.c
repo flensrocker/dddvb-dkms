@@ -42,6 +42,7 @@
 enum EDemodType { CXD2843, CXD2837, CXD2838 };
 enum EDemodState { Unknown, Shutdown, Sleep, ActiveT, 
 		   ActiveT2, ActiveC, ActiveC2, ActiveIT };
+enum ET2Profile { T2P_Base, T2P_Lite };
 enum omode { OM_NONE, OM_DVBT, OM_DVBT2, OM_DVBC, 
 	     OM_QAM_ITU_C, OM_DVBC2, OM_ISDBT };
 
@@ -58,6 +59,7 @@ struct cxd_state {
 
 	enum EDemodType  type;
 	enum EDemodState state;
+	enum ET2Profile T2_profile;
 	enum omode omode;
 
 	u8    IF_FS;
@@ -394,12 +396,12 @@ static int ConfigureTS(struct cxd_state *state,
 		       enum EDemodState newDemodState)
 {
 	int status = 0;
-        u8 OSERCKMODE = 1;
-        u8 OSERDUTYMODE = 1;
+        u8 OSERCKMODE = state->SerialMode ?  1 : 0;
+        u8 OSERDUTYMODE = state->SerialMode ?  1 : 0;
         u8 OTSCKPERIOD = 8;
-        u8 OREG_CKSEL_TSIF = state->SerialClockFrequency;
+        u8 OREG_CKSEL_TSIF = state->SerialMode ? state->SerialClockFrequency : 0;
 	
-        if (state->SerialClockFrequency >= 3 ) {
+        if (state->SerialMode && state->SerialClockFrequency >= 3 ) {
 		OSERCKMODE = 2;
 		OSERDUTYMODE = 2;
 		OTSCKPERIOD = 16;
@@ -512,6 +514,8 @@ static void Sleep_to_ActiveT(struct cxd_state *state, u32 iffreq)
 
         BandSettingT(state, iffreq);
 
+        writebitst(state, 0x10, 0x60, 0x11, 0x1f); /* BER scaling */
+
         writeregt(state, 0x00, 0x80, 0x28); /* Disable HiZ Setting 1 */
 	writeregt(state, 0x00, 0x81, 0x00); /* Disable HiZ Setting 2 */
 }
@@ -604,6 +608,8 @@ static void Sleep_to_ActiveT2(struct cxd_state *state, u32 iffreq)
 
         BandSettingT2(state, iffreq);
 
+        writebitst(state, 0x20, 0x72, 0x08, 0x0f); /* BER scaling */
+
         writeregt(state, 0x00, 0x80, 0x28); /* Disable HiZ Setting 1 */
         writeregt(state, 0x00, 0x81, 0x00); /* Disable HiZ Setting 2 */
 }
@@ -646,6 +652,8 @@ static void Sleep_to_ActiveC(struct cxd_state *state, u32 iffreq)
         writebitst(state, 0x00, 0xCF, 0x01, 0x01);/*TSIF ONOPARITY_MANUAL_ON*/
 
         BandSettingC(state, iffreq);
+
+        writebitst(state, 0x40, 0x60, 0x11, 0x1f); /* BER scaling */
 
         writeregt(state, 0x00, 0x80, 0x28); /* Disable HiZ Setting 1 */
         writeregt(state, 0x00, 0x81, 0x00); /* Disable HiZ Setting 2 */
@@ -1121,11 +1129,18 @@ static void init(struct cxd_state *state)
 
 	writeregx(state, 0xFF, 0x02, 0x00);
 	msleep(4);
+	writeregx(state, 0x00, 0x15, 0x01);
+	writeregx(state, 0x00, 0x17, 0x01);
+	msleep(4);
+
 	writeregx(state, 0x00, 0x10, 0x01);
         
 	writeregsx(state, 0x00, 0x13, data, 2);
+	writeregx(state, 0x00, 0x15, 0x00);
+	msleep(3);
         writeregx(state, 0x00, 0x10, 0x00);
         msleep(2);
+
         state->curbankx = 0xFF;
         state->curbankt = 0xFF;
         
@@ -1137,11 +1152,11 @@ static void init(struct cxd_state *state)
         writebitst(state, 0x10, 0xCB, 0x00, 0x40);
         writeregt(state, 0x10, 0xCD, state->IF_FS);
 
-        writebitst(state, 0x00, 0xC4, 0x80, 0x98);
-        writebitst(state, 0x00, 0xC5, 0x00, 0x07);
+        writebitst(state, 0x00, 0xC4, state->SerialMode ? 0x80 : 0x00, 0x98);
+        writebitst(state, 0x00, 0xC5, 0x01, 0x07);
         writebitst(state, 0x00, 0xCB, 0x00, 0x01);
         writebitst(state, 0x00, 0xC6, 0x00, 0x1D);
-        writebitst(state, 0x00, 0xC8, 0x00, 0x1D);
+        writebitst(state, 0x00, 0xC8, 0x01, 0x1D);
         writebitst(state, 0x00, 0xC9, 0x00, 0x1D);
         writebitst(state, 0x00, 0x83, 0x00, 0x07);
 	writeregt(state, 0x00, 0x84, 0x00);
@@ -1159,10 +1174,9 @@ static void init_state(struct cxd_state *state, struct cxd2843_cfg *cfg)
 	state->adrx = cfg->adr + 0x02;
 	state->curbankt = 0xff;
 	state->curbankx = 0xff;
-
 	mutex_init(&state->mutex);
 
-	state->SerialMode = 1;
+	state->SerialMode = cfg->parallel ? 0 : 1;
 	state->ContinuousClock = 1;
 	state->SerialClockFrequency = 
 		(cfg->ts_clock >= 1 && cfg->ts_clock <= 5) ? 

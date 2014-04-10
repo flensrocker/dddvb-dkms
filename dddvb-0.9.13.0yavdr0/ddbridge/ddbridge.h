@@ -122,12 +122,13 @@ struct ddb_info {
 #define DDB_MOD          3
 #define DDB_OCTONET      4
 	char *name;
-	int   port_num;
-	int   i2c_num;
-	int   led_num;
-	int   fan_num;
-	int   temp_num;
-	int   temp_bus;
+	u8    port_num;
+	u8    i2c_num;
+	u8    led_num;
+	u8    fan_num;
+	u8    temp_num;
+	u8    temp_bus;
+	u8    board_control;   
 	struct ddb_regmap regmap;
 };
 
@@ -228,6 +229,7 @@ struct ddb_port {
 #define DDB_PORT_TUNER          2
 #define DDB_PORT_LOOP           3
 #define DDB_PORT_MOD            4
+	char                  *name; 
 	u32                    type;
 #define DDB_TUNER_NONE          0
 #define DDB_TUNER_DVBS_ST       1
@@ -236,6 +238,9 @@ struct ddb_port {
 #define DDB_TUNER_DVBCT_ST      4
 #define DDB_CI_INTERNAL         5
 #define DDB_CI_EXTERNAL_SONY    6
+#define DDB_TUNER_DVBCT2_SONY_P 7
+#define DDB_TUNER_DVBC2T2_SONY_P 8
+
 #define DDB_TUNER_XO2           16
 #define DDB_TUNER_DVBS          16
 #define DDB_TUNER_DVBCT2_SONY   17
@@ -243,7 +248,7 @@ struct ddb_port {
 #define DDB_TUNER_DVBC2T2_SONY  19
 #define DDB_TUNER_ATSC_ST       20
 #define DDB_TUNER_DVBC2T2_ST    21
-
+		
 	u32                    adr;
 
 	struct ddb_input      *input[2];
@@ -461,6 +466,7 @@ void ddbridge_mod_rate_handler(unsigned long data);
 
 int ddbridge_flashread(struct ddb *dev, u8 *buf, u32 addr, u32 len);
 
+#define DDBRIDGE_VERSION "0.9.13"
 
 #endif
 

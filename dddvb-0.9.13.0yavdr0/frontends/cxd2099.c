@@ -646,7 +646,7 @@ static int write_data(struct dvb_ca_en50221* ca, int slot, u8 *ebuf, int ecount)
 	if (ci->write_busy)
 		return -EAGAIN;
 	mutex_lock(&ci->lock);
-	printk("write_data %d\n", ecount);
+	/*printk("write_data %d\n", ecount);*/
 	write_reg(ci, 0x0d, ecount >> 8);
 	write_reg(ci, 0x0e, ecount & 0xff);
 	write_block(ci, 0x11, ebuf, ecount);

@@ -384,7 +384,7 @@ static void ddb_input_stop(struct ddb_input *input)
 		input->dma->running = 0;
 		spin_unlock_irq(&input->dma->lock);
 	}
-	pr_info("input_stop %d.%d\n", dev->nr, input->nr);
+	/*pr_info("input_stop %d.%d\n", dev->nr, input->nr);*/
 }
 
 static void ddb_input_start(struct ddb_input *input)
@@ -417,7 +417,7 @@ static void ddb_input_start(struct ddb_input *input)
 		input->dma->running = 1;
 		spin_unlock_irq(&input->dma->lock);
 	}
-	pr_info("input_start %d.%d\n", dev->nr, input->nr);
+	/*pr_info("input_start %d.%d\n", dev->nr, input->nr);*/
 }
 
 
@@ -995,16 +995,30 @@ struct cxd2843_cfg cxd2843_1 = {
 	.adr = 0x6d,
 };
 
-static int demod_attach_cxd2843(struct ddb_input *input)
+struct cxd2843_cfg cxd2843p_0 = {
+	.adr = 0x6c,
+	.parallel = 1,
+};
+
+struct cxd2843_cfg cxd2843p_1 = {
+	.adr = 0x6d,
+	.parallel = 1,
+};
+
+static int demod_attach_cxd2843(struct ddb_input *input, int par)
 {
 	struct i2c_adapter *i2c = &input->port->i2c->adap;
 	struct ddb_dvb *dvb = &input->port->dvb[input->nr & 1];
 	struct dvb_frontend *fe;
 
-	fe = dvb->fe = dvb_attach(cxd2843_attach, i2c,
-				  (input->nr & 1) ? &cxd2843_1 : &cxd2843_0);
+	if (par)
+		fe = dvb->fe = dvb_attach(cxd2843_attach, i2c,
+					  (input->nr & 1) ? &cxd2843p_1 : &cxd2843p_0);
+	else
+		fe = dvb->fe = dvb_attach(cxd2843_attach, i2c,
+					  (input->nr & 1) ? &cxd2843_1 : &cxd2843_0);
 	if (!dvb->fe) {
-		pr_err("No cxd2843 found!\n");
+		pr_err("No cxd2837/38/43 found!\n");
 		return -ENODEV;
 	}
 	fe->sec_priv = input;
@@ -1503,7 +1517,14 @@ static int dvb_input_attach(struct ddb_input *input)
 	case DDB_TUNER_DVBCT2_SONY:
 	case DDB_TUNER_DVBC2T2_SONY:
 	case DDB_TUNER_ISDBT_SONY:
-		if (demod_attach_cxd2843(input) < 0)
+		if (demod_attach_cxd2843(input, 0) < 0)
+			return -ENODEV;
+		if (tuner_attach_tda18212dd(input) < 0)
+			return -ENODEV;
+		break;
+	case DDB_TUNER_DVBCT2_SONY_P:
+	case DDB_TUNER_DVBC2T2_SONY_P:
+		if (demod_attach_cxd2843(input, 1) < 0)
 			return -ENODEV;
 		if (tuner_attach_tda18212dd(input) < 0)
 			return -ENODEV;
@@ -1559,7 +1580,7 @@ static int port_has_cxd(struct ddb_port *port, u8 *type)
 	return 1;
 }
 
-static int port_has_mach(struct ddb_port *port, u8 *id)
+static int port_has_xo2(struct ddb_port *port, u8 *id)
 {
 	u8 val;
 	u8 probe[1] = { 0x00 }, data[4];
@@ -1684,28 +1705,41 @@ static int init_xo2(struct ddb_port *port)
 	return 0;
 }
 
+static int port_has_cxd28xx(struct ddb_port *port, u8 *id)
+{
+	struct i2c_adapter *i2c = &port->i2c->adap;
+	int status;
+
+	status = i2c_write_reg(&port->i2c->adap, 0x6c, 0, 0);
+	if (status)
+		return 0;
+	status = i2c_read_reg(i2c, 0x6c, 0xfd, id);
+	if (status)
+		return 0;
+	return 1;
+}
+
 static void ddb_port_probe(struct ddb_port *port)
 {
 	struct ddb *dev = port->dev;
-	char *modname = "NO MODULE";
 	u8 id;
 
+	port->name = "NO MODULE";
 	port->class = DDB_PORT_NONE;
 
 	if (dev->info->type == DDB_MOD) {
-		modname = "MOD";
+		port->name = "MOD";
 		port->class = DDB_PORT_MOD;
-		pr_info("Port %d: MOD\n", port->nr);
 		return;
 	}
 
 	if (port->nr > 1 && dev->info->type == DDB_OCTOPUS_CI) {
-		modname = "CI internal";
+		port->name = "CI internal";
 		port->class = DDB_PORT_CI;
 		port->type = DDB_CI_INTERNAL;
 	} else if (port_has_cxd(port, &id)) {
 		if (id == 1) {
-			modname = "CI";
+			port->name = "CI";
 			port->class = DDB_PORT_CI;
 			port->type = DDB_CI_EXTERNAL_SONY;
 			ddbwritel(dev, I2C_SPEED_400,
@@ -1715,7 +1749,7 @@ static void ddb_port_probe(struct ddb_port *port)
 			       port->nr);
 			return;
 		}
-	} else if (port_has_mach(port, &id)) {
+	} else if (port_has_xo2(port, &id)) {
 		char *xo2names[] = { "DUAL DVB-S2", "DUAL DVB-C/T/T2",
 				     "DUAL DVB-ISDBT", "DUAL DVB-C/C2/T/T2",
 				     "DUAL ATSC", "DUAL DVB-C/C2/T/T2" };
@@ -1723,42 +1757,59 @@ static void ddb_port_probe(struct ddb_port *port)
 		ddbwritel(dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
 		id >>= 2;
 		if (id > 5) {
-			modname = "unknown XO2 DuoFlex";
+			port->name = "unknown XO2 DuoFlex";
 		} else {
 			port->class = DDB_PORT_TUNER;
 			port->type = DDB_TUNER_XO2 + id;
-			modname = xo2names[id];
+			port->name = xo2names[id];
 			init_xo2(port);
 		}
+	} else if (port_has_cxd28xx(port, &id)) {
+		switch (id) {
+		case 0xa4:
+			port->name = "DUAL DVB-CT2 CXD2843";
+			port->type = DDB_TUNER_DVBC2T2_SONY_P;
+			break;
+		case 0xb1:
+			port->name = "DUAL DVB-CT2 CXD2837";
+			port->type = DDB_TUNER_DVBCT2_SONY_P;
+			break;
+		case 0xb0:
+			port->name = "DUAL ISDB-T CXD2838";
+			/* there is no non-xo2 version of this */
+			break;
+		default:
+			return;
+		}
+		port->class = DDB_PORT_TUNER;
+		ddbwritel(dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_stv0900(port)) {
-		modname = "DUAL DVB-S2";
+		port->name = "DUAL DVB-S2";
 		port->class = DDB_PORT_TUNER;
 		port->type = DDB_TUNER_DVBS_ST;
 		ddbwritel(dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_stv0900_aa(port)) {
-		modname = "DUAL DVB-S2";
+		port->name = "DUAL DVB-S2";
 		port->class = DDB_PORT_TUNER;
 		port->type = DDB_TUNER_DVBS_ST_AA;
 		ddbwritel(dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_drxks(port)) {
-		modname = "DUAL DVB-C/T";
+		port->name = "DUAL DVB-C/T";
 		port->class = DDB_PORT_TUNER;
 		port->type = DDB_TUNER_DVBCT_TR;
 		ddbwritel(dev, I2C_SPEED_400, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_stv0367(port)) {
-		modname = "DUAL DVB-C/T";
+		port->name = "DUAL DVB-C/T";
 		port->class = DDB_PORT_TUNER;
 		port->type = DDB_TUNER_DVBCT_ST;
 		ddbwritel(dev, I2C_SPEED_100, port->i2c->regs + I2C_TIMING);
 	} else if (port_has_encti(port)) {
-		modname = "ENCTI";
+		port->name = "ENCTI";
 		port->class = DDB_PORT_LOOP;
 	} else if (port->nr == ts_loop) {
-		modname = "TS LOOP";
+		port->name = "TS LOOP";
 		port->class = DDB_PORT_LOOP;
 	}
-	pr_info("Port %d (TAB %d): %s\n",
-		port->nr, port->nr + 1, modname);
 }
 
 
@@ -1991,8 +2042,10 @@ static int ddb_ports_attach(struct ddb *dev)
 
 	if (dev->info->port_num) {
 		ret = dvb_register_adapters(dev);
-		if (ret < 0)
+		if (ret < 0) {
+			pr_err("Registering adapters failed. Check DVB_MAX_ADAPTERS in config.\n");
 			return ret;
+		}
 	}
 	for (i = 0; i < dev->info->port_num; i++) {
 		port = &dev->port[i];
@@ -2269,6 +2322,15 @@ static void ddb_ports_init(struct ddb *dev)
 	int i;
 	struct ddb_port *port;
 
+	if (dev->info->board_control) {
+		ddbwritel(dev, 0, BOARD_CONTROL);
+		msleep(100);
+		ddbwritel(dev, 4, BOARD_CONTROL);
+		usleep_range(2000, 3000);
+		ddbwritel(dev, 4 | dev->info->board_control, BOARD_CONTROL);
+		usleep_range(2000, 3000);
+	}
+
 	for (i = 0; i < dev->info->port_num; i++) {
 		port = &dev->port[i];
 		port->dev = dev;
@@ -2278,6 +2340,9 @@ static void ddb_ports_init(struct ddb *dev)
 		port->obr = ci_bitrate;
 		mutex_init(&port->i2c_gate_lock);
 		ddb_port_probe(port);
+		pr_info("Port %d (TAB %d): %s\n",
+			port->nr, port->nr + 1, port->name);
+
 		port->dvb[0].adap = &dev->adap[2 * i];
 		port->dvb[1].adap = &dev->adap[2 * i + 1];
 
@@ -2523,7 +2588,7 @@ static int nsd_do_ioctl(struct file *file, unsigned int cmd, void *parg)
 		}
 		ddbcpyfrom(dev, dev->tsbuf, TS_CAPTURE_MEMORY,
 			   TS_CAPTURE_LEN);
-		ts->len = ddbreadl(dev, TS_CAPTURE_RECEIVED) & 0xfff;
+		ts->len = ddbreadl(dev, TS_CAPTURE_RECEIVED) & 0x1fff;
 		if (copy_to_user(ts->ts, dev->tsbuf, ts->len))
 			return -EIO;
 		break;

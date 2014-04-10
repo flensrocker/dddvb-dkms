@@ -1,7 +1,4 @@
-EXTRA_CFLAGS += -DCONFIG_DVB_LNBP21 -DCONFIG_DVB_STV090x -DCONFIG_DVB_STV6110x -DCONFIG_DVB_DRXK -g
-
-obj-$(CONFIG_DVB_DDBRIDGE) += ddbridge.o 
-obj-$(CONFIG_DVB_OCTONET) += octonet.o 
+obj-$(CONFIG_DVB_DDBRIDGE) += ddip.o 
 
 EXTRA_CFLAGS += -Idrivers/media/dvb/frontends -Idrivers/media/dvb-frontends
 EXTRA_CFLAGS += -Idrivers/media/common/tuners 

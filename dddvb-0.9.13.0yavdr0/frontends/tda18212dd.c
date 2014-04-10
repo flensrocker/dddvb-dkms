@@ -774,7 +774,7 @@ static int set_params(struct dvb_frontend *fe)
 
 	bw = (p->bandwidth_hz + 999999) / 1000000;
 	state->m_Frequency = p->frequency;
-	printk("tuner bw=%u  freq=%u\n", bw, state->m_Frequency);
+	/*printk("tuner bw=%u  freq=%u\n", bw, state->m_Frequency);*/
 	if (p->delivery_system == SYS_DVBT ||
 	    p->delivery_system == SYS_DVBT2 ||
 	    p->delivery_system == SYS_ISDBT ||

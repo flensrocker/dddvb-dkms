@@ -324,6 +324,14 @@ static struct ddb_info ddb_v6_5 = {
 	.i2c_num  = 4,
 };
 
+static struct ddb_info ddb_ctv7 = {
+	.type     = DDB_OCTOPUS,
+	.name     = "Digital Devices Cine CT V7 DVB adapter",
+	.port_num = 4,
+	.i2c_num  = 4,
+	.board_control = 3,
+};
+
 static struct ddb_info ddb_satixS2v3 = {
 	.type     = DDB_OCTOPUS,
 	.name     = "Mystique SaTiX-S2 V3 DVB adapter",
@@ -384,6 +392,7 @@ static const struct pci_device_id ddb_id_tbl[] __devinitconst = {
 	DDB_ID(DDVID, 0x0003, DDVID, 0x0021, ddb_v6_5),
 	DDB_ID(DDVID, 0x0003, DDVID, 0x0030, ddb_dvbct),
 	DDB_ID(DDVID, 0x0003, DDVID, 0xdb03, ddb_satixS2v3),
+	DDB_ID(DDVID, 0x0006, DDVID, 0x0031, ddb_ctv7),
 	DDB_ID(DDVID, 0x0011, DDVID, 0x0040, ddb_ci),
 	DDB_ID(DDVID, 0x0011, DDVID, 0x0041, ddb_cis),
 	DDB_ID(DDVID, 0x0201, DDVID, 0x0001, ddb_mod),
@@ -406,7 +415,9 @@ static __init int module_init_ddbridge(void)
 {
 	int stat = -1;
 
-	pr_info("Digital Devices PCIE bridge driver 0.9.10, Copyright (C) 2010-13 Digital Devices GmbH\n");
+	pr_info("Digital Devices PCIE bridge driver " 
+		DDBRIDGE_VERSION 
+		", Copyright (C) 2010-14 Digital Devices GmbH\n");
 	if (ddb_class_create() < 0)
 		return -1;
 	ddb_wq = create_workqueue("ddbridge");
@@ -436,4 +447,4 @@ module_exit(module_exit_ddbridge);
 MODULE_DESCRIPTION("Digital Devices PCIe Bridge");
 MODULE_AUTHOR("Ralph Metzler, Metzler Brothers Systementwicklung");
 MODULE_LICENSE("GPL");
-MODULE_VERSION("0.9.12");
+MODULE_VERSION(DDBRIDGE_VERSION);

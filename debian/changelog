@@ -1,3 +1,10 @@
+dddvb-dkms (0.9.13.0yavdr0) precise; urgency=medium
+
+  * new upstream version
+  * add remove-188-byte-limit-in-ts-write patch
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 10 Apr 2014 20:00:24 +0200
+
 dddvb-dkms (0.9.12.0yavdr0) precise; urgency=medium
 
   * new upstream version
