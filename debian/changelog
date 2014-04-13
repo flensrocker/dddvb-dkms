@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.13.1yavdr0) precise; urgency=medium
+
+  * add clr-dma-buffer-on-open-fix patch
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 13 Apr 2014 10:11:08 +0200
+
 dddvb-dkms (0.9.13.0yavdr0) precise; urgency=medium
 
   * new upstream version
