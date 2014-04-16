@@ -1,0 +1,10 @@
+--- a/ddbridge/ddbridge.c    Thu Mar 27 17:55:03 2014 +0100
++++ b/ddbridge/ddbridge.c    Fri Mar 28 00:20:00 2014 +0100
+@@ -393,6 +393,7 @@
+ 	DDB_ID(DDVID, 0x0003, DDVID, 0x0030, ddb_dvbct),
+ 	DDB_ID(DDVID, 0x0003, DDVID, 0xdb03, ddb_satixS2v3),
+ 	DDB_ID(DDVID, 0x0006, DDVID, 0x0031, ddb_ctv7),
++	DDB_ID(DDVID, 0x0006, DDVID, 0x0032, ddb_ctv7),
+ 	DDB_ID(DDVID, 0x0011, DDVID, 0x0040, ddb_ci),
+ 	DDB_ID(DDVID, 0x0011, DDVID, 0x0041, ddb_cis),
+ 	DDB_ID(DDVID, 0x0201, DDVID, 0x0001, ddb_mod), 

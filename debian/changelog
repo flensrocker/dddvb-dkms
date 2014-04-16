@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.13.2yavdr0) precise; urgency=medium
+
+  * add pci-id for C/T V7
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 16 Apr 2014 18:23:37 +0200
+
 dddvb-dkms (0.9.13.1yavdr0) precise; urgency=medium
 
   * add clr-dma-buffer-on-open-fix patch

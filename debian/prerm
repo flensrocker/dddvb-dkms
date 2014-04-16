@@ -1,7 +1,7 @@
 #!/bin/sh
 
 NAME=dddvb
-VERSION=0.9.13.1yavdr0
+VERSION=0.9.13.2yavdr0
 
 set -e
 
