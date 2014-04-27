@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.14.1yavdr0) precise; urgency=medium
+
+  * new upstream bugfix patch
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 27 Apr 2014 14:23:14 +0200
+
 dddvb-dkms (0.9.14.0yavdr0) precise; urgency=medium
 
   * new upstream version

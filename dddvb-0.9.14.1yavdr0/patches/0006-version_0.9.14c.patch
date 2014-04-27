@@ -1,0 +1,47 @@
+diff --git a/ddbridge/ddbridge-mod.c b/ddbridge/ddbridge-mod.c
+index 46b9394..fdbe01b 100644
+--- a/ddbridge/ddbridge-mod.c
++++ b/ddbridge/ddbridge-mod.c
+@@ -759,6 +759,7 @@ static int mod_set_modulation(struct ddb *dev, int chan, enum fe_modulation mod)
+ 	dev->mod[chan].modulation = mod;
+ 	dev->mod[chan].obitrate = 0x0061072787900000 * (mod + 3);
+ 	dev->mod[chan].ibitrate = dev->mod[chan].obitrate;
++	ddbwritel(dev, qamtab[mod], CHANNEL_SETTINGS(chan));
+ 	return 0;
+ }
+ 
+diff --git a/ddbridge/ddbridge.c b/ddbridge/ddbridge.c
+index ab100c9..d48c860 100644
+--- a/ddbridge/ddbridge.c
++++ b/ddbridge/ddbridge.c
+@@ -386,7 +386,7 @@ static const struct pci_device_id ddb_id_tbl[] __devinitconst = {
+ 	DDB_ID(DDVID, 0x0003, DDVID, 0x0010, ddb_octopus_mini),
+ 	DDB_ID(DDVID, 0x0003, DDVID, 0x0020, ddb_v6),
+ 	DDB_ID(DDVID, 0x0003, DDVID, 0x0021, ddb_v6_5),
+-	DDB_ID(DDVID, 0x0006, DDVID, 0x0032, ddb_v7),
++	DDB_ID(DDVID, 0x0006, DDVID, 0x0022, ddb_v7),
+ 	DDB_ID(DDVID, 0x0003, DDVID, 0x0030, ddb_dvbct),
+ 	DDB_ID(DDVID, 0x0003, DDVID, 0xdb03, ddb_satixS2v3),
+ 	DDB_ID(DDVID, 0x0006, DDVID, 0x0031, ddb_ctv7),
+diff --git a/frontends/cxd2843.c b/frontends/cxd2843.c
+index e8165a5..2110d1f 100644
+--- a/frontends/cxd2843.c
++++ b/frontends/cxd2843.c
+@@ -332,7 +332,7 @@ static int read_tps(struct cxd_state *state, u8 *tps)
+ 		return 0;
+ 
+ 	freeze_regst(state);
+-	readregst(state, 0x10, 0x2f, tps, 7);
++	readregst_unlocked(state, 0x10, 0x2f, tps, 7);
+ 	unfreeze_regst(state);
+ 	return 0;
+ }
+@@ -1819,7 +1819,7 @@ static int get_fe_c(struct cxd_state *state)
+ 	u8 qam;
+ 
+ 	freeze_regst(state);
+-	readregst(state, 0x40, 0x19, &qam, 1);
++	readregst_unlocked(state, 0x40, 0x19, &qam, 1);
+ 	unfreeze_regst(state);
+ 	p->modulation = qam & 0x07;
+ 	return 0;
