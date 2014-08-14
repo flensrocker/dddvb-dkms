@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.14.1yavdr3) trusty; urgency=medium
+
+  * there was a deleted version 1yavdr2 at Launchpad... :)
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 14 Aug 2014 23:09:53 +0200
+
 dddvb-dkms (0.9.14.1yavdr2) trusty; urgency=medium
 
   * rebuild with proper version numbers at all places
