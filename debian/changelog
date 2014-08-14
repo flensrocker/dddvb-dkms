@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.14.1yavdr2) trusty; urgency=medium
+
+  * rebuild with proper version numbers at all places
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 14 Aug 2014 18:40:37 +0200
+
 dddvb-dkms (0.9.14.1yavdr0) precise; urgency=medium
 
   * new upstream bugfix patch
