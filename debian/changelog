@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.17.0yavdr0-trusty) trusty; urgency=medium
+
+  * new upstream version
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 21 Jan 2015 20:40:01 +0100
+
 dddvb-dkms (0.9.14.1yavdr3) trusty; urgency=medium
 
   * there was a deleted version 1yavdr2 at Launchpad... :)

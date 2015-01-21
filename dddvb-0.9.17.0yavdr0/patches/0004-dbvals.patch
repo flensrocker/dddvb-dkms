@@ -1,0 +1,13 @@
+diff --git a/frontends/Makefile b/frontends/Makefile
+index 5fffdb5..9b5b37f 100644
+--- a/frontends/Makefile
++++ b/frontends/Makefile
+@@ -14,7 +14,7 @@ EXTRA_CFLAGS += -DCONFIG_DVB_STV6111
+ EXTRA_CFLAGS += -DCONFIG_DVB_STV0910
+ EXTRA_CFLAGS += -DCONFIG_DVB_LNBH25
+ EXTRA_CFLAGS += -DCONFIG_DVB_MXL5XX
+-EXTRA_CFLAGS += -DDBVALS
++#EXTRA_CFLAGS += -DDBVALS
+ NOSTDINC_FLAGS += -I$(SUBDIRS)/include -I$(SUBDIRS)/dvb-core
+ 
+ drxk-objs := drxk_hard.o 
