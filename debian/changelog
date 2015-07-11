@@ -1,3 +1,9 @@
+dddvb-dkms (0.9.19b.0yavdr0-trusty) trusty; urgency=medium
+
+  * new upstream version
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sat, 11 Jul 2015 12:43:53 +0200
+
 dddvb-dkms (0.9.17.0yavdr0-trusty) trusty; urgency=medium
 
   * new upstream version
