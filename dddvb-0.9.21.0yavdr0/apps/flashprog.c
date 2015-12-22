@@ -567,6 +567,8 @@ int main(int argc, char **argv)
 		type = 5;
 	if (ddbid.device == 0x13)
 		type = 6;
+	if (ddbid.device == 0x12)
+		type = 7;
 	
 	if (!SectorSize)
 		return 0;
@@ -636,6 +638,10 @@ int main(int argc, char **argv)
 		case 6:
 			fname="DVBBridgeV2B_DD01_0013_PRO.fpga";
 			printf("Octopus PRO\n");
+			break;
+		case 7:
+			fname="DVBBridgeV2B_DD01_0012_STD.fpga";
+			printf("Octopus CI\n");
 			break;
 		default:
 			printf("UNKNOWN\n");

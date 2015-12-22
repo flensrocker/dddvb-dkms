@@ -111,12 +111,14 @@ static void dump_regs(struct stv *state)
 	u8 d[11], *c = &state->reg[0];
 
 	read_regs(state, 0, d, 11);
+#if 0
 	pr_info("stv6111_regs = %02x %02x %02x %02x  %02x %02x %02x %02x  %02x %02x %02x\n",
 		d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
 		d[8], d[9], d[10]);
 	pr_info("reg[] =        %02x %02x %02x %02x  %02x %02x %02x %02x  %02x %02x %02x\n",
 		c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7],
 		c[8], c[9], c[10]);
+#endif
 }
 
 static int wait_for_call_done(struct stv *state, u8 mask)
@@ -183,7 +185,6 @@ static int attach_init(struct stv *state)
 {
 	if (write_regs(state, 0, 11))
 		return -1;
-	pr_info("attach_init OK\n");
 	dump_regs(state);
 	return 0;
 }
@@ -192,14 +193,12 @@ static int sleep(struct dvb_frontend *fe)
 {
 	/* struct tda_state *state = fe->tuner_priv; */
 
-	pr_info("tuner sleep\n");
 	return 0;
 }
 
 static int init(struct dvb_frontend *fe)
 {
 	/* struct tda_state *state = fe->tuner_priv; */
-	pr_info("init\n");
 	return 0;
 }
 
@@ -240,7 +239,7 @@ static int set_lof(struct stv *state, u32 LocalFrequency, u32 CutOffFrequency)
 	u32 p = 1, psel = 0, fvco, div, frac;
 	u8 Icp, tmp;
 
-	pr_info("F = %u, COF = %u\n", Frequency, CutOffFrequency);
+	/* pr_info("F = %u, COF = %u\n", Frequency, CutOffFrequency); */
 	if (index < 6)
 		index = 6;
 	if (index > 50)
@@ -307,7 +306,6 @@ static int set_params(struct dvb_frontend *fe)
 {
 	struct stv *state = fe->tuner_priv;
 	struct dtv_frontend_properties *p = &fe->dtv_property_cache;
-	int status;
 	u32 freq, symb, cutoff;
 
 	if (p->delivery_system != SYS_DVBS && p->delivery_system != SYS_DVBS2)
@@ -322,7 +320,7 @@ static int set_params(struct dvb_frontend *fe)
 	set_lof(state, freq, cutoff);
 	if (fe->ops.i2c_gate_ctrl)
 		fe->ops.i2c_gate_ctrl(fe, 0);
-	return status;
+	return 0;
 }
 
 static int get_frequency(struct dvb_frontend *fe, u32 *frequency)

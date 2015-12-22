@@ -56,6 +56,7 @@ LIST_HEAD(mxllist);
 
 struct mxl_base {
 	struct list_head     mxllist;
+	struct list_head     mxls;
 
 	u8                   adr;
 	struct i2c_adapter  *i2c;
@@ -78,7 +79,7 @@ struct mxl_base {
 	struct mutex         i2c_lock;
 	struct mutex         status_lock;
 	struct mutex         tune_lock;
-
+		
 	u8                   buf[MXL_HYDRA_OEM_MAX_CMD_BUFF_LEN];
 
 	u32                  cmd_size;
@@ -86,10 +87,13 @@ struct mxl_base {
 };
 
 struct mxl {
+	struct list_head     mxl;
+	
 	struct mxl_base     *base;
 	struct dvb_frontend  fe;
 	u32                  demod;
 	u32                  tuner;
+	u32                  tuner_in_use;
 
 	unsigned long        tune_time;
 };
@@ -400,6 +404,7 @@ static void release(struct dvb_frontend *fe)
 {
 	struct mxl *state = fe->demodulator_priv;
 
+	list_del(&state->mxl);
 	/* Release one frontend, two more shall take its place! */
 	state->base->count--;
 	if (state->base->count == 0) {
@@ -428,6 +433,8 @@ static int cfg_scrambler(struct mxl *state)
 	return send_command(state, sizeof(buf), buf);
 }
 
+*/
+
 static int CfgDemodAbortTune(struct mxl *state)
 {
 	MXL_HYDRA_DEMOD_ABORT_TUNE_T abortTuneCmd;
@@ -438,7 +445,6 @@ static int CfgDemodAbortTune(struct mxl *state)
 	BUILD_HYDRA_CMD(MXL_HYDRA_ABORT_TUNE_CMD, MXL_CMD_WRITE, cmdSize, &abortTuneCmd, cmdBuff);
 	return send_command(state, cmdSize + MXL_HYDRA_CMD_HEADER_SIZE, &cmdBuff[0]);
 }
-*/
 
 static int send_master_cmd(struct dvb_frontend *fe,
 			   struct dvb_diseqc_master_cmd *cmd)
@@ -502,6 +508,7 @@ static int set_parameters(struct dvb_frontend *fe)
 		while (time_before(jiffies, state->base->next_tune))
 			msleep(10);
 	state->base->next_tune = jiffies + msecs_to_jiffies(100);
+	state->tuner_in_use = state->tuner;
 	BUILD_HYDRA_CMD(MXL_HYDRA_DEMOD_SET_PARAM_CMD, MXL_CMD_WRITE,
 			cmdSize, &demodChanCfg, cmdBuff);
 	stat = send_command(state, cmdSize + MXL_HYDRA_CMD_HEADER_SIZE, &cmdBuff[0]);
@@ -563,8 +570,25 @@ static int tune(struct dvb_frontend *fe, bool re_tune,
 	return 0;
 }
 
+static int enable_tuner(struct mxl *state, u32 tuner, u32 enable);
+
 static int sleep(struct dvb_frontend *fe)
 {
+	struct mxl *state = fe->demodulator_priv;
+	struct mxl *p;
+	
+	CfgDemodAbortTune(state);
+	if (state->tuner_in_use != 0xffffffff) {
+		mutex_lock(&state->base->tune_lock);
+		state->tuner_in_use = 0xffffffff;
+		list_for_each_entry(p, &state->base->mxls, mxl) {
+			if (p->tuner_in_use == state->tuner)
+				break;
+		}
+		if (&p->mxl == &state->base->mxls)
+			enable_tuner(state, state->tuner, 0);
+		mutex_unlock(&state->base->tune_lock);
+	}
 	return 0;
 }
 
@@ -1121,13 +1145,14 @@ static int enable_tuner(struct mxl *state, u32 tuner, u32 enable)
 	
 	ctrlTunerCmd.tunerId = tuner;
 	ctrlTunerCmd.enable = enable;
-	BUILD_HYDRA_CMD(MXL_HYDRA_TUNER_ACTIVATE_CMD, MXL_CMD_WRITE, cmdSize, &ctrlTunerCmd, cmdBuff);
+	BUILD_HYDRA_CMD(MXL_HYDRA_TUNER_ACTIVATE_CMD, MXL_CMD_WRITE,
+			cmdSize, &ctrlTunerCmd, cmdBuff);
 	stat = send_command(state, cmdSize + MXL_HYDRA_CMD_HEADER_SIZE, &cmdBuff[0]);
 	if (stat)
 		return stat;
 #if 1
 	read_register(state, HYDRA_TUNER_ENABLE_COMPLETE, &val);
-	while (--count && !((val >> tuner) & 1)) {
+	while (--count && ((val >> tuner) & 1) != enable) {
 		msleep(20);
 		read_register(state, HYDRA_TUNER_ENABLE_COMPLETE, &val);
 	}
@@ -1147,7 +1172,6 @@ static int config_ts(struct mxl *state, MXL_HYDRA_DEMOD_ID_E demodId,
 	int status = 0;
 	u32 ncoCountMin = 0;
 	u32 clkType = 0;
-	u8 i;
 	
 	MXL_REG_FIELD_T xpt_sync_polarity[MXL_HYDRA_DEMOD_MAX] = {
 		{XPT_SYNC_POLARITY0}, {XPT_SYNC_POLARITY1},
@@ -1610,12 +1634,14 @@ static int probe(struct mxl *state, struct mxl5xx_cfg *cfg)
 	}
 	get_fwinfo(state);
 	
+#if 0
 	config_dis(state, 0);
 	config_dis(state, 1);
 	config_dis(state, 2);
 	config_dis(state, 3);
+#endif
+	
 	config_mux(state);
-
 	mpegInterfaceCfg.enable = MXL_ENABLE;
 	mpegInterfaceCfg.lsbOrMsbFirst = MXL_HYDRA_MPEG_SERIAL_MSB_1ST;
 	/*  supports only (0-104&139)MHz */
@@ -1641,8 +1667,10 @@ static int probe(struct mxl *state, struct mxl5xx_cfg *cfg)
 		if (status)
 			return status;
 	}
+#if 0
 	for (j = 0; j < state->base->tuner_num; j++)
 		enable_tuner(state, j, 1);
+#endif
 	set_drive_strength(state, 1);
 	return 0;
 }
@@ -1660,6 +1688,7 @@ struct dvb_frontend *mxl5xx_attach(struct i2c_adapter *i2c,
 
 	state->demod = demod;
 	state->tuner = tuner;
+	state->tuner_in_use = 0xffffffff;
 
 	base = match_base(i2c, cfg->adr);
 	if (base) {
@@ -1678,7 +1707,8 @@ struct dvb_frontend *mxl5xx_attach(struct i2c_adapter *i2c,
 		mutex_init(&base->i2c_lock);
 		mutex_init(&base->status_lock);
 		mutex_init(&base->tune_lock);
-
+		INIT_LIST_HEAD(&base->mxls);
+		
 		state->base = base;
 		if (probe(state, cfg) < 0) {
 			kfree(base);
@@ -1690,6 +1720,7 @@ struct dvb_frontend *mxl5xx_attach(struct i2c_adapter *i2c,
 	state->fe.ops.xbar[1]       = demod;
 	state->fe.demodulator_priv  = state;
 	state->fe.dtv_property_cache.input = tuner;
+	list_add(&state->mxl, &base->mxls);
 	return &state->fe;
 
 fail:
