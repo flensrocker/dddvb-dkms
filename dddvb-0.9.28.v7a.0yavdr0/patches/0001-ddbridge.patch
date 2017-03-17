@@ -1,8 +1,8 @@
 diff --git a/ddbridge/ddbridge-core.c b/ddbridge/ddbridge-core.c
-index 63a5270..4e3aee7 100644
+index 3a457e3..3413429 100644
 --- a/ddbridge/ddbridge-core.c
 +++ b/ddbridge/ddbridge-core.c
-@@ -962,16 +962,19 @@ static int locked_gate_ctrl(struct dvb_frontend *fe, int enable)
+@@ -1324,16 +1324,19 @@ static int locked_gate_ctrl(struct dvb_frontend *fe, int enable)
  	return status;
  }
  
@@ -24,9 +24,9 @@ index 63a5270..4e3aee7 100644
 +
 +	fe = dvb->fe = dvb_attach(drxk_attach, &config, i2c);
  	if (!fe) {
- 		pr_err("No DRXK found!\n");
+ 		pr_err("DDBridge: No DRXK found!\n");
  		return -ENODEV;
-@@ -1920,7 +1923,7 @@ static int dvb_input_attach(struct ddb_input *input)
+@@ -2284,7 +2287,7 @@ static int dvb_input_attach(struct ddb_input *input)
  		if (tuner_attach_stv6111(input, 1) < 0)
  			return -ENODEV;
  		break;
