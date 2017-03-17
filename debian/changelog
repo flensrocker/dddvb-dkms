@@ -1,5 +1,11 @@
 dddvb-dkms (0.9.28.v7a.0yavdr0-trusty) trusty; urgency=medium
 
+  * Added 0006-act_cam_race.patch
+
+ -- Jasmin Jessich <jasmin@anw.at>  Fri, 17 Mar 2017 21:00:36 +0100
+
+dddvb-dkms (0.9.28.v7a.0yavdr0-trusty) trusty; urgency=medium
+
   * new upstream version
 
  -- Jasmin Jessich <jasmin@anw.at>  Sat, 04 Mar 2017 02:13:34 +0100
